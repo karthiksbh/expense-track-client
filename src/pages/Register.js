@@ -1,10 +1,14 @@
 import React, { useState } from 'react'
+import Message from './Message';
 
 export const Register = () => {
     const [fname, setFname] = useState('');
     const [lname, setLname] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+
+    const [message, setMessage] = useState(null);
+    const [colour,setColour] = useState('');
 
     async function loginUser(e) {
         e.preventDefault();
@@ -24,9 +28,14 @@ export const Register = () => {
 
         console.log(response);
         if(response.status===201){
-            window.location.href = '/login'
+            setMessage("✔ User successfully registered");
+            setColour("#90EE90");
+            setTimeout(() => {
+                window.location.href="/login";
+            }, 1500);
         }else{
-            alert("Please check if the details are correct and the email is not registered");
+            setMessage("✘ Please check if the details are correct and the email is not registered");
+            setColour("#FF6961");
         }
     }
 
@@ -37,7 +46,7 @@ export const Register = () => {
             <div>
                 <h4>Register a New User</h4>
             </div>
-
+            {message && <Message message={message} colour={colour}/>}
             <>
                 <h3>Register to Start using the Expense Tracker</h3>
                 <form id="form" onSubmit={loginUser}>

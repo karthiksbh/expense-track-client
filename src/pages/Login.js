@@ -1,11 +1,14 @@
 import React, { useState } from 'react'
+import Message from './Message';
 
 export const Login = () => {
 
-    const [email,setEmail] = useState('');
-    const [password,setPassword] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [message, setMessage] = useState(null);
+    const [colour,setColour] = useState('');
 
-    async function loginUser(e){
+    async function loginUser(e) {
         e.preventDefault();
 
         const response = await fetch('http://127.0.0.1:8000/login/', {
@@ -19,14 +22,19 @@ export const Login = () => {
             })
         })
 
-        const data=await response.json();
-       if(response.status===200){
-        localStorage.setItem('access_token',data.access_token);
-        localStorage.setItem('refresh_token',data.refresh_token);
-        alert("Login Success");
-       }else{
-        alert("Please check the email and password entered");
-       }
+        const data = await response.json();
+        if (response.status === 200) {
+            localStorage.setItem('access_token', data.access_token);
+            localStorage.setItem('refresh_token', data.refresh_token);
+            setMessage("✔ Login Success");
+            setColour("#90EE90");
+            setTimeout(() => {
+                window.location.href="/";
+            }, 1000);
+        } else {
+            setMessage("✘ Login Failed: Please check your email ID and Password");
+            setColour("#FF6961");
+        }
     }
 
     return (
@@ -35,12 +43,13 @@ export const Login = () => {
             <div>
                 <h4>Login</h4>
             </div>
+            {message && <Message message={message} colour={colour}/>}
             <>
                 <h3>Login to View the Income and Expenses</h3>
                 <form id="form" onSubmit={loginUser}>
                     <div className="form-control">
                         <label htmlFor="text">Email</label>
-                        <input type="text" id="text" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter email..." />
+                        <input type="text" id="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter email..." />
                     </div>
                     <div className="form-control">
                         <label

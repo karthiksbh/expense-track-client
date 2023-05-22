@@ -8,6 +8,8 @@ export const ExpensePage = () => {
     const [expense, setExpense] = useState(0);
     const [selectedOption, setSelectedOption] = useState('');
 
+    const [transactions, setTransactions] = useState([]);
+
     const [name, setName] = useState('');
 
     const fetchUser = async () => {
@@ -83,10 +85,58 @@ export const ExpensePage = () => {
         }
     };
 
+    const fetchTransactions = async () => {
+        try {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                window.location.href = "/login";
+                return;
+            }
+            const response = await fetch('http://127.0.0.1:8000/history/', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+            setTransactions(data);
+        } catch (error) {
+            console.error('Error fetching expense:', error);
+        }
+    }
+
+    const deleteItem = async (transId) => {
+        try {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                window.location.href = "/login";
+                return;
+            }
+            const response = await fetch(`http://127.0.0.1:8000/delete/${transId}/`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                console.log(data);
+                fetchExpense();
+                fetchTotals();
+                fetchTransactions();
+                alert('Transaction deleted');
+            } else {
+                alert('Failed to delete transaction');
+            }
+        } catch (error) {
+            console.error('Error deleting transaction:', error);
+        }
+    }
+
     useEffect(() => {
         fetchUser();
         fetchTotals();
         fetchExpense();
+        fetchTransactions();
     }, []);
 
 
@@ -118,6 +168,7 @@ export const ExpensePage = () => {
             alert('Transaction Added');
             fetchExpense();
             fetchTotals();
+            fetchTransactions();
             setAmount('');
             setTitle('');
             setSelectedOption('');
@@ -129,7 +180,7 @@ export const ExpensePage = () => {
 
     return (
         <div className="container">
-            <h2>Hi {name},</h2>
+            <h2>Welcome {name},</h2>
             <div>
                 <h4>Your Balance</h4>
                 <h1>₹{balance}</h1>
@@ -147,11 +198,14 @@ export const ExpensePage = () => {
             </div>
 
             <>
-                <h3>History</h3>
+                <h3>Transaction History</h3>
                 <ul id="list" className="list">
-                    <li className="minus">
-                        Cash <span>-₹400</span><button className="delete-btn">x</button>
-                    </li>
+                    {transactions.map((transaction) => (
+                        <li key={transaction.id} className={transaction.typeof === 'Income' ? 'money plus' : 'money minus'}>
+                            {transaction.title} - {new Date(transaction.createdOn).toLocaleDateString('en-GB')} <span>{transaction.typeof === 'Income' ? '+' : '-'}₹{transaction.amount}</span>
+                            <button className="delete-btn" onClick={() => deleteItem(transaction.id)}>x</button>
+                        </li>
+                    ))}
                 </ul>
             </>
 
@@ -178,6 +232,10 @@ export const ExpensePage = () => {
                     <button className="btn">Add transaction</button>
                 </form>
             </>
+
+            <button className="btn" style={{backgroundColor:"#FF6961"}}>LOGOUT USER</button>
         </div>
+
+        
     )
 }
