@@ -23,10 +23,6 @@ export const Login = () => {
        if(response.status===200){
         localStorage.setItem('access_token',data.access_token);
         localStorage.setItem('refresh_token',data.refresh_token);
-        localStorage.setItem('firstName',data.firstName);
-        if(data.lastName===null){
-            localStorage.setItem('lastName',"");
-        }
         alert("Login Success");
        }else{
         alert("Please check the email and password entered");

@@ -6,48 +6,109 @@ export const ExpensePage = () => {
     const [balance, setBalance] = useState(0);
     const [income, setIncome] = useState(0);
     const [expense, setExpense] = useState(0);
+    const [selectedOption, setSelectedOption] = useState('');
 
-        const fetchTotals = async () => {
-            try {
-                const response = await fetch('http://127.0.0.1:8000/totals/');
-                const data = await response.json();
-                console.log(data);
-                setIncome(data.income);
-                setExpense(data.expense);
-            } catch (error) {
-                console.error('Error fetching expense:', error);
+    const [name, setName] = useState('');
+
+    const fetchUser = async () => {
+        try {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                window.location.href = "/login";
+                return;
             }
-        };
-
-        const fetchExpense = async () => {
-            try {
-                const response = await fetch('http://127.0.0.1:8000/balance/');
-                const data = await response.json();
-                console.log(data);
-                setBalance(data.total);
-            } catch (error) {
-                console.error('Error fetching expense:', error);
+            const response = await fetch('http://127.0.0.1:8000/profile/', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (response.status === 401) {
+                window.location.href = "/login";
+                return;
             }
-        };
+            const data = await response.json();
+            console.log(data.data.first_name);
+            var fullName = "";
+            if (data.data.last_name === null) {
+                fullName = data.data.first_name;
+            } else {
+                fullName = data.data.first_name + " " + data.data.last_name;
+            }
+            console.log(fullName);
+            setName(fullName);
+        } catch (error) {
+            console.error('Error fetching user:', error);
+        }
+    };
 
-        useEffect(() => {
-            fetchTotals();
-            fetchExpense();
-          }, []);
+    const fetchTotals = async () => {
+        try {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                window.location.href = "/login";
+                return;
+            }
+            const response = await fetch('http://127.0.0.1:8000/totals/',
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+            const data = await response.json();
+            console.log(data);
+            setIncome(data.income);
+            setExpense(data.expense);
+        } catch (error) {
+            console.error('Error fetching expense:', error);
+        }
+    };
+
+    const fetchExpense = async () => {
+        try {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                window.location.href = "/login";
+                return;
+            }
+            const response = await fetch('http://127.0.0.1:8000/balance/', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+            console.log(data);
+            setBalance(data.total);
+        } catch (error) {
+            console.error('Error fetching expense:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchUser();
+        fetchTotals();
+        fetchExpense();
+    }, []);
 
 
     async function addTransaction(e) {
         e.preventDefault();
         const amountValue = parseFloat(amount);
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            window.location.href = "/login";
+            return;
+        }
 
         const response = await fetch('http://127.0.0.1:8000/transaction/', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
             },
             body: JSON.stringify({
                 title: title,
-                amount: amountValue
+                amount: amountValue,
+                typeof: selectedOption,
             })
         })
 
@@ -57,6 +118,9 @@ export const ExpensePage = () => {
             alert('Transaction Added');
             fetchExpense();
             fetchTotals();
+            setAmount('');
+            setTitle('');
+            setSelectedOption('');
         } else {
             alert('Invalid Inputs');
         }
@@ -65,8 +129,7 @@ export const ExpensePage = () => {
 
     return (
         <div className="container">
-            <h2>Student Expense Tracker</h2>
-
+            <h2>Hi {name},</h2>
             <div>
                 <h4>Your Balance</h4>
                 <h1>₹{balance}</h1>
@@ -100,9 +163,16 @@ export const ExpensePage = () => {
                         <input type="text" id="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Enter text..." />
                     </div>
                     <div className="form-control">
+                        <label htmlFor="dropdown">Dropdown</label>
+                        <select id="dropdown" value={selectedOption} onChange={(e) => setSelectedOption(e.target.value)}>
+                            <option value="" disabled>Select an option</option>
+                            <option value="Income">Income</option>
+                            <option value="Expenditure">Expense</option>
+                        </select>
+                    </div>
+                    <div className="form-control">
                         <label htmlFor="amount"
-                        >Amount <br />
-                            (negative - expense, positive - income)</label>
+                        >Amount </label>
                         <input type="number" id="amount" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Enter amount..." />
                     </div>
                     <button className="btn">Add transaction</button>
