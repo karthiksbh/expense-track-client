@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
+import Message from './Message';
 
 export const ExpensePage = () => {
     const [title, setTitle] = useState('');
-    const [amount, setAmount] = useState(0);
+    const [amount, setAmount] = useState('');
     const [balance, setBalance] = useState(0);
     const [income, setIncome] = useState(0);
     const [expense, setExpense] = useState(0);
@@ -11,6 +12,11 @@ export const ExpensePage = () => {
     const [transactions, setTransactions] = useState([]);
 
     const [name, setName] = useState('');
+    const [message,setMessage] = useState('');
+    const [colour,setColour] = useState('');
+
+    const [deleteMessage,setdeleteMessage] = useState('');
+    const [deleteColour,setdeleteColour] = useState('');
 
     const fetchUser = async () => {
         try {
@@ -19,7 +25,7 @@ export const ExpensePage = () => {
                 window.location.href = "/login";
                 return;
             }
-            const response = await fetch('http://127.0.0.1:8000/profile/', {
+            const response = await fetch(process.env.REACT_APP_BASE_URL + 'profile/', {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -50,7 +56,7 @@ export const ExpensePage = () => {
                 window.location.href = "/login";
                 return;
             }
-            const response = await fetch('http://127.0.0.1:8000/totals/',
+            const response = await fetch(process.env.REACT_APP_BASE_URL + 'totals/',
                 {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -72,7 +78,7 @@ export const ExpensePage = () => {
                 window.location.href = "/login";
                 return;
             }
-            const response = await fetch('http://127.0.0.1:8000/balance/', {
+            const response = await fetch(process.env.REACT_APP_BASE_URL + 'balance/', {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -92,7 +98,7 @@ export const ExpensePage = () => {
                 window.location.href = "/login";
                 return;
             }
-            const response = await fetch('http://127.0.0.1:8000/history/', {
+            const response = await fetch(process.env.REACT_APP_BASE_URL + 'history/', {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -111,24 +117,37 @@ export const ExpensePage = () => {
                 window.location.href = "/login";
                 return;
             }
-            const response = await fetch(`http://127.0.0.1:8000/delete/${transId}/`, {
+            const response = await fetch(process.env.REACT_APP_BASE_URL + `delete/${transId}/`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
             if (response.ok) {
-                const data = await response.json();
-                console.log(data);
+                setdeleteMessage("✔ Transaction Deleted");
+                setdeleteColour("#90EE90");
                 fetchExpense();
                 fetchTotals();
                 fetchTransactions();
-                alert('Transaction deleted');
+                setTimeout(() => {
+                    setdeleteMessage('');
+                    setdeleteColour('');
+                  }, 3000);
             } else {
-                alert('Failed to delete transaction');
+                setdeleteMessage("✘ Failed to delete transaction");
+                setdeleteColour("#FF6961");
+                setTimeout(() => {
+                    setdeleteMessage('');
+                    setdeleteColour('');
+                  }, 3000);
             }
         } catch (error) {
-            console.error('Error deleting transaction:', error);
+            setdeleteMessage("✘ Failed to delete transaction");
+            setdeleteColour("#FF6961");
+            setTimeout(() => {
+                setdeleteMessage('');
+                setdeleteColour('');
+              }, 3000);
         }
     }
 
@@ -149,7 +168,7 @@ export const ExpensePage = () => {
             return;
         }
 
-        const response = await fetch('http://127.0.0.1:8000/transaction/', {
+        const response = await fetch(process.env.REACT_APP_BASE_URL + 'transaction/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -165,17 +184,33 @@ export const ExpensePage = () => {
         const data = await response.json();
         console.log(data);
         if (response.ok) {
-            alert('Transaction Added');
+            setMessage("✔ Transaction Added");
+            setColour("#90EE90");
             fetchExpense();
             fetchTotals();
             fetchTransactions();
             setAmount('');
             setTitle('');
             setSelectedOption('');
+            setTimeout(() => {
+                setMessage('');
+                setColour('');
+              }, 3000);
         } else {
-            alert('Invalid Inputs');
+            setMessage("✘ Invalid Details entered");
+            setColour("#FF6961");
+            setTimeout(() => {
+                setMessage('');
+                setColour('');
+              }, 3000);
         }
     }
+
+    const logout = () => {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        window.location.href="/login";
+      };
 
 
     return (
@@ -199,6 +234,7 @@ export const ExpensePage = () => {
 
             <>
                 <h3>Transaction History</h3>
+                {deleteMessage && <Message message={deleteMessage} colour={deleteColour}/>}
                 <ul id="list" className="list">
                     {transactions.map((transaction) => (
                         <li key={transaction.id} className={transaction.typeof === 'Income' ? 'money plus' : 'money minus'}>
@@ -211,6 +247,7 @@ export const ExpensePage = () => {
 
             <>
                 <h3>Add new transaction</h3>
+                {message && <Message message={message} colour={colour}/>}
                 <form id="form" onSubmit={addTransaction}>
                     <div className="form-control">
                         <label htmlFor="text">Text</label>
@@ -233,9 +270,8 @@ export const ExpensePage = () => {
                 </form>
             </>
 
-            <button className="btn" style={{backgroundColor:"#FF6961"}}>LOGOUT USER</button>
+            <button className="btn" style={{backgroundColor:"#FF6961"}} onClick={logout}>LOGOUT USER</button>
         </div>
-
         
     )
 }

@@ -13,7 +13,7 @@ export const Register = () => {
     async function loginUser(e) {
         e.preventDefault();
 
-        const response = await fetch('http://127.0.0.1:8000/register/', {
+        const response = await fetch(process.env.REACT_APP_BASE_URL + 'register/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -39,6 +39,11 @@ export const Register = () => {
         }
     }
 
+    const login = () => {
+        window.location.href="/login";
+      };
+
+
     return (
         <div className="container">
             <h2>Student Expense Tracker</h2>
@@ -59,15 +64,16 @@ export const Register = () => {
                         <input type="text" id="text" value={lname} onChange={(e) => setLname(e.target.value)} placeholder="Enter your last name..." />
                     </div>
                     <div className="form-control">
-                        <label htmlFor="text">Email</label>
+                        <label htmlFor="text">Email *</label>
                         <input type="email" id="text" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email..." />
                     </div>
                     <div className="form-control">
                         <label
-                        >Password<br /></label>
+                        >Password *<br /></label>
                         <input type="password" id="amount" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password..." />
                     </div>
                     <button className="btn">REGISTER USER</button>
+                    <button className="btn" style={{backgroundColor:"#FF6961"}} onClick={login}>ALREADY HAVE AN ACCOUNT?</button>
                 </form>
             </>
         </div>

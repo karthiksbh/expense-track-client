@@ -11,7 +11,7 @@ export const Login = () => {
     async function loginUser(e) {
         e.preventDefault();
 
-        const response = await fetch('http://127.0.0.1:8000/login/', {
+        const response = await fetch(process.env.REACT_APP_BASE_URL + 'login/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -21,6 +21,7 @@ export const Login = () => {
                 password: password
             })
         })
+
 
         const data = await response.json();
         if (response.status === 200) {
@@ -37,6 +38,10 @@ export const Login = () => {
         }
     }
 
+    const register = () => {
+        window.location.href="/register";
+      };
+
     return (
         <div className="container">
             <h2>Student Expense Tracker</h2>
@@ -49,7 +54,7 @@ export const Login = () => {
                 <form id="form" onSubmit={loginUser}>
                     <div className="form-control">
                         <label htmlFor="text">Email</label>
-                        <input type="text" id="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter email..." />
+                        <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter email..." />
                     </div>
                     <div className="form-control">
                         <label
@@ -57,6 +62,7 @@ export const Login = () => {
                         <input type="password" id="amount" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter password..." />
                     </div>
                     <button className="btn">LOGIN USER</button>
+                    <button className="btn" style={{backgroundColor:"#FF6961"}} onClick={register}>DON'T HAVE AN ACCOUNT?</button>
                 </form>
             </>
         </div>
