@@ -1,22 +1,27 @@
 import React, { useState, useEffect } from 'react'
 import Message from './Message';
+import Chart from "chart.js/auto";
+import { Pie } from "react-chartjs-2";
 
 export const ExpensePage = () => {
     const [title, setTitle] = useState('');
     const [amount, setAmount] = useState('');
+    const [category,setCategory] = useState('');
+
     const [balance, setBalance] = useState(0);
     const [income, setIncome] = useState(0);
     const [expense, setExpense] = useState(0);
+    const [warning,setWarning] = useState('');
     const [selectedOption, setSelectedOption] = useState('');
 
     const [transactions, setTransactions] = useState([]);
 
     const [name, setName] = useState('');
-    const [message,setMessage] = useState('');
-    const [colour,setColour] = useState('');
+    const [message, setMessage] = useState('');
+    const [colour, setColour] = useState('');
 
-    const [deleteMessage,setdeleteMessage] = useState('');
-    const [deleteColour,setdeleteColour] = useState('');
+    const [deleteMessage, setdeleteMessage] = useState('');
+    const [deleteColour, setdeleteColour] = useState('');
 
     const fetchUser = async () => {
         try {
@@ -49,6 +54,19 @@ export const ExpensePage = () => {
         }
     };
 
+    const labels = ["Income", "Expense"];
+
+    const chartData = {
+        labels: labels,
+        datasets: [
+            {
+                data: [income, -expense],
+                backgroundColor: ['#2E8B57', '#c0392b'],
+                hoverBackgroundColor: ['#4CAF50', 'rgb(255, 105, 97)'],
+            },
+        ],
+    };
+
     const fetchTotals = async () => {
         try {
             const token = localStorage.getItem('access_token');
@@ -66,6 +84,11 @@ export const ExpensePage = () => {
             console.log(data);
             setIncome(data.income);
             setExpense(data.expense);
+            if(data.income<data.expense){
+                setWarning('warn');
+            }else{
+                setWarning('');
+            }
         } catch (error) {
             console.error('Error fetching expense:', error);
         }
@@ -132,14 +155,14 @@ export const ExpensePage = () => {
                 setTimeout(() => {
                     setdeleteMessage('');
                     setdeleteColour('');
-                  }, 3000);
+                }, 3000);
             } else {
                 setdeleteMessage("✘ Failed to delete transaction");
                 setdeleteColour("#FF6961");
                 setTimeout(() => {
                     setdeleteMessage('');
                     setdeleteColour('');
-                  }, 3000);
+                }, 3000);
             }
         } catch (error) {
             setdeleteMessage("✘ Failed to delete transaction");
@@ -147,7 +170,7 @@ export const ExpensePage = () => {
             setTimeout(() => {
                 setdeleteMessage('');
                 setdeleteColour('');
-              }, 3000);
+            }, 3000);
         }
     }
 
@@ -178,6 +201,7 @@ export const ExpensePage = () => {
                 title: title,
                 amount: amountValue,
                 typeof: selectedOption,
+                categories: category
             })
         })
 
@@ -195,21 +219,56 @@ export const ExpensePage = () => {
             setTimeout(() => {
                 setMessage('');
                 setColour('');
-              }, 3000);
+            }, 3000);
         } else {
             setMessage("✘ Invalid Details entered");
             setColour("#FF6961");
             setTimeout(() => {
                 setMessage('');
                 setColour('');
-              }, 3000);
+            }, 3000);
         }
     }
 
     const logout = () => {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
-        window.location.href="/login";
+        window.location.href = "/login";
+    };
+
+    const IncomeDropdown = () => {
+        return (
+          <div>
+            <label>Income Categories</label>
+            <select id="dropdown" value={category} onChange={(e) => setCategory(e.target.value)}>
+            <option value="" disabled>Select an option</option>
+              <option value="Salary">Salary</option>
+              <option value="Freelance">Freelance</option>
+              <option value="Investment">Investment</option>
+              <option value="Rental Income">Rental Income</option>
+              <option value="Gifts">Gifts</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        );
+      };
+      
+      const ExpenditureDropdown = () => {
+        return (
+          <div>
+            <label>Expenditure Categories</label>
+            <select id="dropdown" value={category} onChange={(e) => setCategory(e.target.value)}>
+                <option value="" default disabled>Select an option</option>
+              <option value="Food">Food</option>
+              <option value="Transportation">Transportation</option>
+              <option value="Housing and Groceries">Housing and Groceries</option>
+              <option value="Health">Health</option>
+              <option value="Entertainment">Entertainment</option>
+              <option value="Personal Care">Personal Care</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        );
       };
 
 
@@ -221,20 +280,18 @@ export const ExpensePage = () => {
                 <h1>₹{balance}</h1>
             </div>
 
-            <div className="inc-exp-container">
-                <div>
-                    <h4>Income</h4>
-                    <p id="money-plus" className="money plus">+₹{income}</p>
-                </div>
-                <div>
-                    <h4>Expense</h4>
-                    <p id="money-minus" className="money minus">-₹{expense}</p>
+            {warning==='warn' && <Message message="Warning: Expenses have exceeded the income. Please review and adjust your spending." colour="#FF6961" />}
+
+            <div className="container">
+                <h3 className="chart-title">Income Expenditure Chart</h3>
+                <div className="chart-box">
+                    <Pie data={chartData} />
                 </div>
             </div>
 
             <>
                 <h3>Transaction History</h3>
-                {deleteMessage && <Message message={deleteMessage} colour={deleteColour}/>}
+                {deleteMessage && <Message message={deleteMessage} colour={deleteColour} />}
                 <ul id="list" className="list">
                     {transactions.map((transaction) => (
                         <li key={transaction.id} className={transaction.typeof === 'Income' ? 'money plus' : 'money minus'}>
@@ -247,20 +304,24 @@ export const ExpensePage = () => {
 
             <>
                 <h3>Add new transaction</h3>
-                {message && <Message message={message} colour={colour}/>}
+                {message && <Message message={message} colour={colour} />}
                 <form id="form" onSubmit={addTransaction}>
                     <div className="form-control">
-                        <label htmlFor="text">Text</label>
+                        <label htmlFor="text">Transaction Title</label>
                         <input type="text" id="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Enter text..." />
                     </div>
                     <div className="form-control">
-                        <label htmlFor="dropdown">Dropdown</label>
+                        <label htmlFor="dropdown">Type of Transaction</label>
                         <select id="dropdown" value={selectedOption} onChange={(e) => setSelectedOption(e.target.value)}>
                             <option value="" disabled>Select an option</option>
                             <option value="Income">Income</option>
                             <option value="Expenditure">Expense</option>
                         </select>
                     </div>
+
+                    {selectedOption === 'Income' && <IncomeDropdown />}
+                    {selectedOption === 'Expenditure' && <ExpenditureDropdown />}
+
                     <div className="form-control">
                         <label htmlFor="amount"
                         >Amount </label>
@@ -270,8 +331,8 @@ export const ExpensePage = () => {
                 </form>
             </>
 
-            <button className="btn" style={{backgroundColor:"#FF6961"}} onClick={logout}>LOGOUT USER</button>
+            <button className="btn" style={{ backgroundColor: "#FF6961" }} onClick={logout}>LOGOUT USER</button>
         </div>
-        
+
     )
 }
