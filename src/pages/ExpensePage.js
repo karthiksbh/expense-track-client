@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Message from './Message';
 import Chart from "chart.js/auto";
 import { Pie } from "react-chartjs-2";
+import { Link } from 'react-router-dom';
 
 export const ExpensePage = () => {
     const [title, setTitle] = useState('');
@@ -247,7 +248,7 @@ export const ExpensePage = () => {
               <option value="Investment">Investment</option>
               <option value="Rental Income">Rental Income</option>
               <option value="Gifts">Gifts</option>
-              <option value="Other">Other</option>
+              <option value="Other Income">Other Income</option>
             </select>
           </div>
         );
@@ -265,7 +266,7 @@ export const ExpensePage = () => {
               <option value="Health">Health</option>
               <option value="Entertainment">Entertainment</option>
               <option value="Personal Care">Personal Care</option>
-              <option value="Other">Other</option>
+              <option value="Other Expense">Other Expense</option>
             </select>
           </div>
         );
@@ -287,6 +288,8 @@ export const ExpensePage = () => {
                 <div className="chart-box">
                     <Pie data={chartData} />
                 </div>
+                <br></br>
+                <Link to="/insights">View More Insights ➡️</Link>
             </div>
 
             <>
