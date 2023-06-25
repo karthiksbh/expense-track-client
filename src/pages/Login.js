@@ -10,8 +10,8 @@ export const Login = () => {
 
     async function loginUser(e) {
         e.preventDefault();
-
-        const response = await fetch(process.env.REACT_APP_BASE_URL + 'login/', {
+        
+        const response = await fetch(process.env.REACT_APP_BASE_URL + '/users/login/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -26,7 +26,6 @@ export const Login = () => {
         const data = await response.json();
         if (response.status === 200) {
             localStorage.setItem('access_token', data.access_token);
-            localStorage.setItem('refresh_token', data.refresh_token);
             setMessage("✔ Login Success");
             setColour("#90EE90");
             setTimeout(() => {

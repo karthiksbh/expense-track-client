@@ -10,17 +10,17 @@ export const Register = () => {
     const [message, setMessage] = useState(null);
     const [colour,setColour] = useState('');
 
-    async function loginUser(e) {
+    async function registerUser(e) {
         e.preventDefault();
 
-        const response = await fetch(process.env.REACT_APP_BASE_URL + 'register/', {
+        const response = await fetch(process.env.REACT_APP_BASE_URL + '/users/register/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                first_name:fname,
-                last_name:lname,
+                firstName:fname,
+                lastName:lname,
                 email: email,
                 password: password
             })
@@ -54,7 +54,7 @@ export const Register = () => {
             {message && <Message message={message} colour={colour}/>}
             <>
                 <h3>Register to Start using the Expense Tracker</h3>
-                <form id="form" onSubmit={loginUser}>
+                <form id="form" onSubmit={registerUser}>
                     <div className="form-control">
                         <label htmlFor="text">First Name *</label>
                         <input type="text" id="text" value={fname} onChange={(e) => setFname(e.target.value)} placeholder="Enter your first name..." />

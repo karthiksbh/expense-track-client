@@ -19,7 +19,7 @@ export const Insights = () => {
         window.location.href = '/login';
         return;
       }
-      const response = await fetch(process.env.REACT_APP_BASE_URL + 'income-wise/', {
+      const response = await fetch(process.env.REACT_APP_BASE_URL + '/expense/income-group-wise/', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -42,7 +42,7 @@ export const Insights = () => {
         window.location.href = '/login';
         return;
       }
-      const response = await fetch(process.env.REACT_APP_BASE_URL + 'expense-wise/', {
+      const response = await fetch(process.env.REACT_APP_BASE_URL + '/expense/expense-group-wise/', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -88,7 +88,7 @@ export const Insights = () => {
   return (
     <div>
         <br></br>
-        <Link to="/">🔙 Go Back</Link>
+        <Link to="/"> ← Go Back</Link>
       <h2>Transaction Insights</h2>
       <div className="container">
       {incomeMessage && <Message message={incomeMessage} colour="#90EE90" />}

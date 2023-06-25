@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import Message from './Message';
 import Chart from "chart.js/auto";
 import { Pie } from "react-chartjs-2";
-import { Link } from 'react-router-dom';
 
 export const ExpensePage = () => {
     const [title, setTitle] = useState('');
@@ -31,7 +30,7 @@ export const ExpensePage = () => {
                 window.location.href = "/login";
                 return;
             }
-            const response = await fetch(process.env.REACT_APP_BASE_URL + 'profile/', {
+            const response = await fetch(process.env.REACT_APP_BASE_URL + '/expense/profile/', {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -41,12 +40,12 @@ export const ExpensePage = () => {
                 return;
             }
             const data = await response.json();
-            console.log(data.data.first_name);
+            console.log(data.data.firstName);
             var fullName = "";
             if (data.data.last_name === null) {
-                fullName = data.data.first_name;
+                fullName = data.data.firstName;
             } else {
-                fullName = data.data.first_name + " " + data.data.last_name;
+                fullName = data.data.firstName + " " + data.data.lastName;
             }
             console.log(fullName);
             setName(fullName);
@@ -75,7 +74,7 @@ export const ExpensePage = () => {
                 window.location.href = "/login";
                 return;
             }
-            const response = await fetch(process.env.REACT_APP_BASE_URL + 'totals/',
+            const response = await fetch(process.env.REACT_APP_BASE_URL + '/expense/total/',
                 {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -102,14 +101,14 @@ export const ExpensePage = () => {
                 window.location.href = "/login";
                 return;
             }
-            const response = await fetch(process.env.REACT_APP_BASE_URL + 'balance/', {
+            const response = await fetch(process.env.REACT_APP_BASE_URL + '/expense/balance/', {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
             const data = await response.json();
             console.log(data);
-            setBalance(data.total);
+            setBalance(data.total.toFixed(2));
         } catch (error) {
             console.error('Error fetching expense:', error);
         }
@@ -122,7 +121,7 @@ export const ExpensePage = () => {
                 window.location.href = "/login";
                 return;
             }
-            const response = await fetch(process.env.REACT_APP_BASE_URL + 'history/', {
+            const response = await fetch(process.env.REACT_APP_BASE_URL + '/expense/history/', {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -141,7 +140,7 @@ export const ExpensePage = () => {
                 window.location.href = "/login";
                 return;
             }
-            const response = await fetch(process.env.REACT_APP_BASE_URL + `delete/${transId}/`, {
+            const response = await fetch(process.env.REACT_APP_BASE_URL + `/expense/delete/${transId}/`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -192,7 +191,7 @@ export const ExpensePage = () => {
             return;
         }
 
-        const response = await fetch(process.env.REACT_APP_BASE_URL + 'transaction/', {
+        const response = await fetch(process.env.REACT_APP_BASE_URL + '/expense/create/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -201,7 +200,7 @@ export const ExpensePage = () => {
             body: JSON.stringify({
                 title: title,
                 amount: amountValue,
-                typeof: selectedOption,
+                expenseType: selectedOption,
                 categories: category
             })
         })
@@ -236,6 +235,19 @@ export const ExpensePage = () => {
         localStorage.removeItem('refresh_token');
         window.location.href = "/login";
     };
+
+    const insights = () => {
+        window.location.href = "/insights";
+    };
+
+    const requests = () => {
+        window.location.href = "/request";
+    };
+
+    const receiveRequests = () => {
+        window.location.href = "/receive-request";
+    };
+
 
     const IncomeDropdown = () => {
         return (
@@ -289,7 +301,9 @@ export const ExpensePage = () => {
                     <Pie data={chartData} />
                 </div>
                 <br></br>
-                <Link to="/insights">View More Insights ➡️</Link>
+                <button className="btn" onClick={insights}>CLICK TO VIEW MORE INSIGHTS</button>
+                <button className="btn" style={{ backgroundColor: "#FF6961" }} onClick={requests}>VIEW SENT REQUESTS</button>
+                <button className="btn" style={{ backgroundColor: "#FF6961" }} onClick={receiveRequests}>VIEW RECEIVED REQUESTS</button>
             </div>
 
             <>
